@@ -9,6 +9,7 @@ import { Subtitle } from './components/Subtitle';
 import { TabBar } from './components/TabBar';
 import { SearchInput } from './components/SearchInput';
 import { ReportCard } from './components/ReportCard';
+import ReportPage from './ReportPage';
 
 const reports = [
   {
@@ -41,11 +42,32 @@ const reports = [
   },
 ];
 
-
 export default function IndexPage() {
   const [search, setSearch] = useState('');
   const [activeSection, setActiveSection] = useState('Copilot dashboard');
+  const [selectedReport, setSelectedReport] = useState(null);
+  // simple slug generator for URLs
+  const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   const filteredReports = reports.filter(r => r.title.toLowerCase().includes(search.toLowerCase()));
+
+  React.useEffect(() => {
+    const handleHash = () => {
+      const h = (window.location.hash || '').replace(/^#\/?/, '');
+      const parts = h.split('/');
+      if (parts[0] === 'reports' && parts[1]) {
+        const slug = parts[1];
+        const found = reports.find(r => slugify(r.title) === slug);
+        if (found) {
+          setSelectedReport(found);
+          return;
+        }
+      }
+      setSelectedReport(null);
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-indigo-50 via-white to-purple-50 flex flex-col" style={{fontFamily:'Segoe UI, Arial, sans-serif'}}>
@@ -55,6 +77,8 @@ export default function IndexPage() {
         <main className="flex-1 px-12 py-10 overflow-auto">
           {activeSection === 'Copilot dashboard' ? (
             <CopilotDashboard />
+          ) : selectedReport ? (
+            <ReportPage report={selectedReport} onClose={() => { window.location.hash = ''; }} />
           ) : (
             <>
               <SectionTitle>Reports</SectionTitle>
@@ -66,7 +90,7 @@ export default function IndexPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-8 w-full max-w-[1200px] mx-auto">
                 {filteredReports.map((report, i) => (
                   <div className="flex" key={i}>
-                    <ReportCard {...report} onView={() => alert('View report: ' + report.title)} className="flex-1 w-full min-w-0" />
+                    <ReportCard {...report} onView={() => { window.location.hash = `#/reports/${slugify(report.title)}` }} className="flex-1 w-full min-w-0" />
                   </div>
                 ))}
               </div>

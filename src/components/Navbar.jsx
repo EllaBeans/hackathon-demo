@@ -1,8 +1,10 @@
 // React functional component for the main navigation bar
 // Purpose: Top navigation bar with logo, app name, and user avatar
-import React from 'react';
+import React, { useState } from 'react';
 
 export function Navbar({ userName = 'User', avatarUrl }) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   return (
     <nav className="flex items-center justify-between bg-white shadow-sm border-b border-gray-200 px-7 py-2 h-14">
       <div className="flex items-center gap-3">
@@ -10,10 +12,20 @@ export function Navbar({ userName = 'User', avatarUrl }) {
         <button className="mr-2 p-1 rounded hover:bg-gray-100 focus:outline-none">
           <svg width="22" height="22" fill="none" viewBox="0 0 24 24" className="text-gray-500"><rect y="5" width="24" height="2" rx="1" fill="currentColor"/><rect y="11" width="24" height="2" rx="1" fill="currentColor"/><rect y="17" width="24" height="2" rx="1" fill="currentColor"/></svg>
         </button>
-        {/* App logo */}
-        <span className="w-8 h-8 bg-gradient-to-tr from-indigo-200 to-indigo-400 rounded-lg flex items-center justify-center">
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><rect width="24" height="24" rx="6" fill="#E0E7FF"/><path d="M7 12h10M12 7v10" stroke="#6366f1" strokeWidth="2" strokeLinecap="round"/></svg>
-        </span>
+        {/* App logo: prefer an attached PNG at /logo.png (public root). Falls back to inline SVG if unavailable. */}
+        <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
+          {/** showCustom toggles off if the PNG fails to load so the fallback SVG appears */}
+          <img
+            src="/logo.png"
+            alt="App logo"
+            className="w-full h-full object-cover"
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" className="absolute" aria-hidden>
+            <rect width="24" height="24" rx="6" fill="#E0E7FF"/>
+            <path d="M7 12h10M12 7v10" stroke="#6366f1" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </div>
         <span className="font-semibold text-[20px] leading-tight text-gray-900 tracking-tight" style={{fontFamily:'Segoe UI, Arial, sans-serif'}}>Microsoft Viva Insights</span>
       </div>
       <div className="flex items-center gap-6">
